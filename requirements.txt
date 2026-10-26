@@ -1,6 +1,8 @@
-torch
-torchvision
 controlnet_aux
+timm
+einops
+scipy
+scikit-image
 fastapi
 uvicorn[standard]
 python-multipart
