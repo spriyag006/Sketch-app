@@ -1,19 +1,18 @@
 import io
-from fastapi import FastAPI, UploadFile, File, Form
+from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from PIL import Image
-from sketcher import classic_sketch, dl_sketch
+from sketcher import classic_sketch
 
 app = FastAPI(title="Photo to Sketch")
 
 
 @app.post("/sketch")
-async def sketch(file: UploadFile = File(...), mode: str = Form("hed")):
+async def sketch(file: UploadFile = File(...)):
     img = Image.open(io.BytesIO(await file.read())).convert("RGB")
-    img.thumbnail((768, 768))  # keep CPU inference fast
-
-    out = classic_sketch(img) if mode == "classic" else dl_sketch(img, mode)
+    img.thumbnail((1024, 1024))
+    out = classic_sketch(img)
 
     buf = io.BytesIO()
     out.save(buf, format="PNG")

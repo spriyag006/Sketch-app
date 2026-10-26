@@ -1,13 +1,6 @@
---extra-index-url https://download.pytorch.org/whl/cpu
-torch
-torchvision
-controlnet_aux
-timm
-einops
-scipy
-scikit-image
 fastapi
 uvicorn[standard]
 python-multipart
 pillow
 opencv-python-headless
+numpy
