@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Photo to Sketch</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 900px; margin: 30px auto; padding: 0 16px; }
+    .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+    button, select, input { padding: 8px 12px; font-size: 15px; }
+    button { background: #222; color: #fff; border: 0; border-radius: 6px; cursor: pointer; }
+    button:disabled { opacity: .5; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    img { width: 100%; border: 1px solid #ccc; border-radius: 8px; min-height: 120px; background: #fafafa; }
+    @media (max-width: 600px) { .row { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <h2>Photo to Sketch</h2>
+
+  <div class="controls">
+    <input type="file" id="file" accept="image/*" />
+    <select id="mode">
+      <option value="hed">HED (soft sketch)</option>
+      <option value="lineart">Lineart (clean lines)</option>
+      <option value="pidinet">PiDiNet (bold edges)</option>
+      <option value="classic">Classic OpenCV (baseline)</option>
+    </select>
+    <button id="go">Convert</button>
+    <a id="download" download="sketch.png" style="display:none"><button>Download</button></a>
+  </div>
+
+  <div class="row">
+    <div><h4>Original</h4><img id="orig" /></div>
+    <div><h4>Sketch</h4><img id="result" /></div>
+  </div>
+
+  <script>
+    const fileInput = document.getElementById("file");
+    const orig = document.getElementById("orig");
+    const result = document.getElementById("result");
+    const go = document.getElementById("go");
+    const dl = document.getElementById("download");
+
+    fileInput.onchange = () => {
+      const f = fileInput.files[0];
+      if (f) orig.src = URL.createObjectURL(f);
+    };
+
+    go.onclick = async () => {
+      const f = fileInput.files[0];
+      if (!f) return alert("Choose an image first");
+      go.disabled = true; go.textContent = "Processing...";
+      const form = new FormData();
+      form.append("file", f);
+      form.append("mode", document.getElementById("mode").value);
+      try {
+        const res = await fetch("/sketch", { method: "POST", body: form });
+        if (!res.ok) throw new Error(await res.text());
+        const url = URL.createObjectURL(await res.blob());
+        result.src = url;
+        dl.href = url; dl.style.display = "inline";
+      } catch (e) {
+        alert("Error: " + e.message);
+      }
+      go.disabled = false; go.textContent = "Convert";
+    };
+  </script>
+</body>
+</html>
